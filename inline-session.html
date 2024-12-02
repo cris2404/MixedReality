@@ -77,15 +77,21 @@
 
     async function setupSession(session) {
       if (!gl) setupGL();
-
+    
       session.updateRenderState({
         baseLayer: new XRWebGLLayer(session, gl)
       });
-
-      xrRefSpace = await session.requestReferenceSpace('local');
+    
+      try {
+        xrRefSpace = await session.requestReferenceSpace('local');
+      } catch (e) {
+        console.warn("Falling back to 'viewer' reference space:", e);
+        xrRefSpace = await session.requestReferenceSpace('viewer');
+        }
 
       session.requestAnimationFrame((time, frame) => onXRFrame(session, time, frame));
     }
+
 
     function onXRFrame(session, time, frame) {
       const pose = frame.getViewerPose(xrRefSpace);
